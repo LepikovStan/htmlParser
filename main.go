@@ -6,8 +6,10 @@ import (
 	"os"
 	//"strings"
 	"time"
-	"./lib/ctrl"
-	//"./lib/Node"
+	//"github.com/LepikovStan/htmlParser/lib/stack"
+	"github.com/LepikovStan/htmlParser/lib/fsm"
+	"github.com/LepikovStan/htmlParser/lib/stack"
+	"strings"
 )
 
 func readFile(path string) string {
@@ -23,86 +25,56 @@ func readFile(path string) string {
 	return result
 }
 
-type Stack struct {
-	stack []string
+type Controller struct {
+	fsm *fsm.Fsm
+	stack *stack.Stack
 }
-
-func (s *Stack) Head() string {
-	return s.stack[0]
+func (c *Controller) Init(fsm *fsm.Fsm, stack *stack.Stack) {
+	c.fsm = fsm
+	c.stack = stack
 }
-func (s *Stack) Unshift(char string) {
-	s.stack = append([]string{char}, s.stack...)
-}
-func (s *Stack) Pop() string {
-	head := s.stack[0]
-	s.stack = s.stack[1:len(s.stack)]
-	return head
-}
-func (s *Stack) Print() {
-	fmt.Println(s.stack)
-}
-
-type Tree struct {
-	//tree []Node.Node
-	tree []string
-	word string
-	flag bool
-}
-
-func (t *Tree) getFlag() bool {
-	return t.flag
-}
-func (t *Tree) createTag() {
-	t.word = ""
-	t.flag = true
-}
-func (t *Tree) updateTag(char string) {
-	t.word += char
-}
-func (t *Tree) getTag() string {
-	t.flag = false
-	t.tree = append(t.tree, t.word)
-	return t.word
-}
-func (t *Tree) getTags() []string {
-	return t.tree
-}
-
-func fsm(char string, stack *Stack, tree *Tree) {
-	stack.Print()
+func (c *Controller) Input(char string) {
 	switch {
-	case char == "/" && stack.Head() == "<":
-		fmt.Println("start ending tag")
 	case char == "<":
-		fmt.Println("start tag")
-		stack.Unshift(char)
-		tree.createTag()
-	case char == ">":
-		fmt.Println("end tag")
-		stack.Pop()
-		tree.getTag()
-	case char != "/" && stack.Head() == "<":
-		fmt.Println("tag -> ", char)
-		tree.updateTag(char)
+		c.stack.Unshift(char)
+		c.fsm.SetCurrentState("waiting")
+	case char == ">" && c.stack.Head() == "<":
+		c.stack.Pop()
+		c.stack.Unshift("")
+		c.fsm.SetCurrentState("waiting")
+	case char != "/" && c.stack.Head() == "<":
+		c.fsm.SetCurrentState("tagParsing")
+	case char == "/" && c.stack.Head() == "<":
+		c.stack.Pop()
+		c.stack.Unshift("")
+		c.fsm.SetCurrentState("waiting")
 	}
-
 }
 
 func main() {
 	start := time.Now()
-	controller := ctrl.Init()
-	fmt.Println(controller.GetCurrentState())
+
+	file := readFile("html/test.html")
+	chars := strings.Split(file, "")
+
+	stk := stack.Init()
+	fsm := fsm.Init()
+	ctrl := Controller{}
+	ctrl.Init(fsm, stk)
+
+	//fmt.Println(fsm.GetCurrentState())
 	//file := readFile("html/PDF-report-8b89e64e1132cbd877b479e517f46db7375370adccade7f085d4492a0315f225.html")
-	//file := readFile("html/test.html")
+
 	//stack := Stack{}
 	//tree := Tree{}
 	//
 	//chars := strings.Split(file, "")
 	//count := 0
-	//for n, char := range chars {
-	//	count = n
-	//	fsm(char, &stack, &tree)
-	//}
+	for _, char := range chars {
+		ctrl.Input(char)
+		stk.Print()
+		fmt.Println(char, fsm.GetCurrentState())
+	}
 	//fmt.Println("end", count, tree.getTags()[0])
 
 	end := time.Now()
