@@ -6,10 +6,13 @@ type Node struct {
 	content []Node
 }
 
-func (n *Node) GetAttr(attrName string) string {
-	return n.attrs[attrName]
-}
-
 func (n *Node) GetTagName() string {
 	return n.tagName
+}
+func (n *Node) GetAttribute(attrName string) string {
+	if attr, ok := n.attrs[attrName]; ok {
+		return attr
+	} else {
+		return ""
+	}
 }

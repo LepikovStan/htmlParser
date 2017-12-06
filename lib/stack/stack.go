@@ -12,7 +12,11 @@ func (s *Stack) Init() *Stack {
 }
 
 func (s *Stack) Head() string {
-	return s.stack[0]
+	if len(s.stack) > 0 {
+		return s.stack[0]
+	} else {
+		return ""
+	}
 }
 func (s *Stack) Unshift(char string) {
 	s.stack = append([]string{char}, s.stack...)
@@ -23,7 +27,7 @@ func (s *Stack) Pop() string {
 	return head
 }
 func (s *Stack) Print() {
-	fmt.Print(s.stack)
+	fmt.Println("stack ->", s.stack)
 }
 
 func Init() *Stack {
