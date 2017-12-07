@@ -20,7 +20,7 @@ func readFile(path string) string {
 	scanner.Split(bufio.ScanLines)
 
 	for scanner.Scan() {
-		result = fmt.Sprintf("%s%s", result, scanner.Text())
+		result = fmt.Sprintf("%s%s", result, strings.Trim(scanner.Text(), " "))
 	}
 	return result
 }
@@ -111,6 +111,7 @@ func (fsm *FSM) Init() {
 			"*": "tagNameCreating",
 		},
 		"tagAttributeNameCreating": map[string]string{
+			">": "tagCreatingEnd",
 			"=": "tagAttributeValueCreatingStart",
 			"*": "tagAttributeNameCreating",
 		},
@@ -214,7 +215,23 @@ func main() {
 			node.tagName += char
 			tagNameToClose += char
 		case "tagAttributeNameCreating":
-			attributeName += char
+			if char == " " {
+				if attributeName != "" && attributeValue != "" {
+					node.SetAttribute(strings.Trim(attributeName, " "), attributeValue)
+					attributeName = ""
+					attributeValue = ""
+				}
+			} else {
+				attributeName += char
+			}
+		case "tagAttributeValueCreating":
+			if char == " " {
+				node.SetAttribute(strings.Trim(attributeName, " "), attributeValue)
+				attributeName = ""
+				attributeValue = ""
+			} else if char != "\"" {
+				attributeValue += char
+			}
 		case "tagCreatingEnd":
 			node.SetAttribute(strings.Trim(attributeName, " "), attributeValue)
 			attributeName = ""
@@ -225,17 +242,9 @@ func main() {
 			node.Init()
 			attributeName = ""
 			attributeValue = ""
-		case "tagAttributeValueCreating":
-			if char == " " {
-				node.SetAttribute(strings.Trim(attributeName, " "), attributeValue)
-				attributeName = ""
-				attributeValue = ""
-			} else if char != "\"" {
-				attributeValue += char
-			}
 		}
 
-		fmt.Println(n, char, fsm.GetCurrentState())
+		fmt.Println(n, char, fsm.GetCurrentState(), attributeName, attributeValue)
 	}
 	for _, node := range nodes {
 		fmt.Println("node", *node)
