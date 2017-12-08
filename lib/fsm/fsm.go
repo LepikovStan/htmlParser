@@ -1,28 +1,82 @@
 package fsm
 
-type Fsm struct {
-	states map[string]string
+import (
+	"fmt"
+	"../node"
+)
+
+type FSM struct {
+	table        map[string]map[string]string
 	currentState string
 }
 
-func (fsm *Fsm) Init() *Fsm {
-	fsm.states = map[string]string{
-		"waiting": "waiting",
-		"tagParsing": "tagParsing",
-	}
+func (fsm *FSM) Init() {
 	fsm.currentState = "waiting"
-	return fsm
+	fsm.table = map[string]map[string]string{
+		"waiting": map[string]string{
+			"<": "tagNameCreatingStart",
+		},
+		"tagNameCreatingStart": map[string]string{
+			"/": "tagClosingStart",
+			"*": "tagNameCreating",
+		},
+		"tagNameCreating": map[string]string{
+			" ": "tagAttributeNameCreating",
+			">": "tagCreatingEnd",
+			"/": "tagCreatingEnd",
+			"*": "tagNameCreating",
+		},
+		"tagAttributeNameCreating": map[string]string{
+			">": "tagCreatingEnd",
+			"=": "tagAttributeValueCreatingStart",
+			"*": "tagAttributeNameCreating",
+		},
+		"tagAttributeValueCreatingStart": map[string]string{
+			"\"": "tagAttributeValueCreatingStart",
+			"*":  "tagAttributeValueCreating",
+		},
+		"tagAttributeValueCreating": map[string]string{
+			">": "tagCreatingEnd",
+			" ": "tagAttributeNameCreating",
+			"*": "tagAttributeValueCreating",
+		},
+		"tagCreatingEnd": map[string]string{
+			"<": "tagNameCreatingStart",
+			">": "tagClosingEnd",
+		},
+		"tagClosingStart": map[string]string{
+			"*": "tagClosingTagName",
+		},
+		"tagClosingTagName": map[string]string{
+			">": "tagClosingEnd",
+			"*": "tagClosingTagName",
+		},
+		"tagClosingEnd": map[string]string{
+			"<": "tagNameCreatingStart",
+			//"*": "tagClosingTagName",
+		},
+	}
 }
-func (fsm *Fsm) GetCurrentState() string {
+func (fsm *FSM) Input(char string) {
+	newState, ok := fsm.table[fsm.currentState][char]
+	if !ok {
+		newState = fsm.table[fsm.currentState]["*"]
+	}
+	fsm.currentState = newState
+}
+func (fsm *FSM) GetCurrentState() string {
 	return fsm.currentState
 }
 
-func (fsm *Fsm) SetCurrentState(state string) {
-	if newState, ok := fsm.states[state]; ok {
-		fsm.currentState = newState
+func pr(n *node.Node) {
+	fmt.Println("node ->", n.GetTagName(), n.GetAttributes())
+	for _, in := range n.GetContent() {
+		pr(in)
 	}
 }
 
-func Init() *Fsm {
-	return new(Fsm).Init()
+func Create() *FSM {
+	fsm := new(FSM)
+	fsm.Init()
+	return fsm
 }

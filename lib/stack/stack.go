@@ -1,27 +1,30 @@
 package stack
 
-import "fmt"
+import (
+	"fmt"
+	"../node"
+)
 
 type Stack struct {
-	stack []string
+	stack []*node.Node
 }
 
 func (s *Stack) Init() *Stack {
-	s.stack = []string{}
+	s.stack = []*node.Node{}
 	return s
 }
 
-func (s *Stack) Head() string {
+func (s *Stack) Head() *node.Node {
 	if len(s.stack) > 0 {
 		return s.stack[0]
 	} else {
-		return ""
+		return nil
 	}
 }
-func (s *Stack) Unshift(char string) {
-	s.stack = append([]string{char}, s.stack...)
+func (s *Stack) Unshift(nd *node.Node) {
+	s.stack = append([]*node.Node{nd}, s.stack...)
 }
-func (s *Stack) Pop() string {
+func (s *Stack) Pop() *node.Node {
 	head := s.stack[0]
 	s.stack = s.stack[1:len(s.stack)]
 	return head

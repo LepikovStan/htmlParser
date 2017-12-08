@@ -16,7 +16,7 @@ func TestGetAttr(t *testing.T) {
 		t.Fatalf("Wrong tag name")
 	}
 
-	if n.GetAttr("class") != "test" {
+	if n.GetAttribute("class") != "test" {
 		t.Fatalf("Wrong tag attribute class")
 	}
 }
