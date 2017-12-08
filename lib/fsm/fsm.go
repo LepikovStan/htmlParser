@@ -28,6 +28,7 @@ func (fsm *FSM) Init() {
 		},
 		"tagAttributeNameCreating": map[string]string{
 			">": "tagCreatingEnd",
+			"/": "tagCreatingEnd",
 			"=": "tagAttributeValueCreatingStart",
 			"*": "tagAttributeNameCreating",
 		},
@@ -37,8 +38,14 @@ func (fsm *FSM) Init() {
 		},
 		"tagAttributeValueCreating": map[string]string{
 			">": "tagCreatingEnd",
+			"\"": "tagAttributeValueCreatingEnd",
 			" ": "tagAttributeNameCreating",
 			"*": "tagAttributeValueCreating",
+		},
+		"tagAttributeValueCreatingEnd": map[string]string{
+			" ": "tagAttributeNameCreating",
+			">": "tagCreatingEnd",
+			"/": "tagCreatingEnd",
 		},
 		"tagCreatingEnd": map[string]string{
 			"<": "tagNameCreatingStart",

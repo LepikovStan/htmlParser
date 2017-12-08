@@ -28,7 +28,7 @@ func readFile(path string) string {
 }
 
 func pr(n *node.Node) {
-	fmt.Println("node ->", n.GetTagName(), n.GetAttributes())
+	fmt.Println("node ->", n.GetTagName(), n.GetAttributes(), n.GetParent().GetTagName())
 	for _, in := range n.GetContent() {
 		pr(in)
 	}
@@ -47,28 +47,23 @@ func main() {
 	nd := node.CreateNewNode()
 	top := nd
 
-	tagNameToClose := ""
+	var nodeToClose *node.Node
 
-	for n, char := range chars {
+	for _, char := range chars {
 		finsm.Input(char)
 
 		switch finsm.GetCurrentState() {
-		case "tagClosingStart":
-			tagNameToClose = ""
-		case "tagClosingTagName":
-			if char != "/" {
-				tagNameToClose += char
-			}
+		//case "tagClosingStart":
+		//case "tagClosingTagName":
 		case "tagClosingEnd":
-			stackNode := *stck.Head()
-			for stackNode.GetTagName() == tagNameToClose {
-				stackNode = node.Node{}
+			stackNode := stck.Head()
+			for stackNode == nodeToClose {
+				stackNode = nil
 				stck.Pop()
 			}
-			tagNameToClose = ""
+			nodeToClose = stck.Head()
 		case "tagNameCreating":
 			nd.CreateTagName(char)
-			tagNameToClose += char
 		case "tagAttributeNameCreating":
 			if char == " " {
 				nd.SetAttribute()
@@ -85,13 +80,15 @@ func main() {
 			nd.SetAttribute()
 			parentNode := stck.Head()
 			if parentNode != nil {
+				nd.SetParent(parentNode)
 				parentNode.SetContent(nd)
 			}
 			stck.Unshift(nd)
+			nodeToClose = nd
 			nd = node.CreateNewNode()
 		}
 
-		fmt.Println(n, char, finsm.GetCurrentState())
+		fmt.Println(char, finsm.GetCurrentState())
 	}
 	stck.Print()
 	pr(top)

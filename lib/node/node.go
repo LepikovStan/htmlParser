@@ -8,11 +8,13 @@ type Node struct {
 	attributeValue string
 	attrs          map[string]string
 	content        []*Node
+	parent *Node
 }
 
 func (n *Node) init() {
 	n.attrs = make(map[string]string)
 	n.content = []*Node{}
+	n.parent = new(Node)
 }
 func (n *Node) GetTagName() string {
 	return n.tagName
@@ -48,6 +50,12 @@ func (n *Node) SetContent(nd *Node) {
 }
 func (n *Node) GetContent() []*Node {
 	return n.content
+}
+func (n *Node) SetParent(nd *Node) {
+	n.parent = nd
+}
+func (n *Node) GetParent() *Node {
+	return n.parent
 }
 
 func CreateNewNode() *Node {
