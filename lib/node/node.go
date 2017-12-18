@@ -9,7 +9,19 @@ type Node struct {
 	attrs          map[string]string
 	content        []*Node
 	parent *Node
+	isText func() bool
+	text        string
 }
+func (n *Node) HasText() bool {
+	return n.text != ""
+}
+func (n *Node) AddText(char string) {
+	n.text += char
+}
+func (n *Node) GetText() string {
+	return n.text
+}
+
 
 func (n *Node) init() {
 	n.attrs = make(map[string]string)

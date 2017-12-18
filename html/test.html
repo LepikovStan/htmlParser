@@ -1,5 +1,48 @@
 <html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <link />
-</head></html>
+<head>
+    <title>PDF Report</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" media="all" charset="utf-8" href="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/styles/style.css"/>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/vendor/lodash/lodash.min.js"></script>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/vendor/jquery/dist/jquery.min.js"></script>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/vendor/highcharts/highcharts.js"></script>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/vendor/highcharts/highcharts-more.js"></script>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/page-split.js"></script>
+    <script src="file:///home/stanislav/pdf-service/html-render/lib/../../render/public/scripts/helper.js"></script>
+</head>
+<body>
+<div></div>
+<div class="pages"></div>
+<script id="template-colontitul-top" type="text/template">
+    <div class="page-colontitul-top">
+        <img src="file:///home/stanislav/pdf-service/server/public/images/logo-front-page.svg" alt="Semrush" class="logo"/>
+        <div class="top-header">7 Neshaminy Interplex, Suite 301, Trevose, PA 19053<br/>www.semrush.com</div>
+    </div>
+</script>
+<script id="template-colontitul-bottom" type="text/template">
+    <div class="page-colontitul-bottom">
+        <div class="copyright-date">Generated on November 16, 2017</div>
+        <div class="pagination"><%- data.page %></div>
+    </div>
+</script>
+<div class="page-sandbox-portrait page-sandbox">
+    <div class="page-portrait page-colontituls-off"></div>
+    <div class="page-vertical">
+        <div class="page-vertical-content title-page">
+            <div class="logo">
+                <img src="file:///home/stanislav/pdf-service/server/public/images/logo-front-page.svg" alt="Semrush"/>
+            </div>
+            <h1></h1>
+            <h2>
+                <div class="date">Generated on November 16, 2017</div>
+            </h2>
+        </div>
+    </div>
+    <div id="toc">{ "isNeedTOC": false, "TOCTitle": "Table of contents" }</div>
+    <div class="page-portrait page-new page-colontituls-on"></div>
+    <div class="sem-widget-pdf page-vertical sem-widget-OrganicTrafficInsightsTopTrafficChannels">
+        <div class="sem-widget-content page-vertical-content"></div>
+    </div>
+</div>
+</body>
+</html>

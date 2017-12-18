@@ -50,6 +50,7 @@ func (fsm *FSM) Init() {
 		"tagCreatingEnd": map[string]string{
 			"<": "tagNameCreatingStart",
 			">": "tagClosingEnd",
+			"*": "textCreating",
 		},
 		"tagClosingStart": map[string]string{
 			"*": "tagClosingTagName",
@@ -60,7 +61,11 @@ func (fsm *FSM) Init() {
 		},
 		"tagClosingEnd": map[string]string{
 			"<": "tagNameCreatingStart",
-			//"*": "tagClosingTagName",
+			"*": "textCreating",
+		},
+		"textCreating": map[string]string{
+			"<": "tagNameCreatingStart",
+			"*": "textCreating",
 		},
 	}
 }

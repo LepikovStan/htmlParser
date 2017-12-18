@@ -14,6 +14,19 @@ import (
 	"strings"
 )
 
+var simpleTags = map[string]bool{
+	"meta": true,
+	"img": true,
+	"link": true,
+	"br": true,
+	"hr": true,
+	"input": true,
+	"area": true,
+	"param": true,
+	"col": true,
+	"base": true,
+}
+
 func readFile(path string) string {
 	var result string
 	inFile, _ := os.Open(path)
@@ -28,7 +41,11 @@ func readFile(path string) string {
 }
 
 func pr(n *node.Node) {
-	fmt.Println("node ->", n.GetTagName(), n.GetAttributes(), n.GetParent().GetTagName())
+	if n.GetTagName() != "" {
+		fmt.Println("node ->", n.GetTagName(), n.GetAttributes(), n.GetParent().GetTagName())
+	} else {
+		fmt.Println("node ->", "text", n.GetText(), n.GetParent().GetTagName())
+	}
 	for _, in := range n.GetContent() {
 		pr(in)
 	}
@@ -40,12 +57,13 @@ func main() {
 	finsm := fsm.Create()
 
 	//file := readFile("html/PDF-report-8b89e64e1132cbd877b479e517f46db7375370adccade7f085d4492a0315f225.html")
-	file := readFile("html/test.html")
+	file := readFile("html/test2.html")
 	chars := strings.Split(file, "")
 	stck := stack.Init()
 
-	nd := node.CreateNewNode()
-	top := nd
+	tagNode := node.CreateNewNode()
+	textNode := node.CreateNewNode()
+	top := tagNode
 
 	var nodeToClose *node.Node
 
@@ -55,37 +73,50 @@ func main() {
 		switch finsm.GetCurrentState() {
 		//case "tagClosingStart":
 		//case "tagClosingTagName":
+		case "tagNameCreatingStart":
+			fmt.Println(stck.Head(), textNode)
+			stackNode := stck.Head()
+			if stackNode != nil && textNode.HasText() {
+				textNode.SetParent(stackNode)
+				stackNode.SetContent(textNode)
+				textNode = node.CreateNewNode()
+			}
+		case "textCreating":
+			textNode.AddText(char)
 		case "tagClosingEnd":
 			stackNode := stck.Head()
-			for stackNode == nodeToClose {
+			for stackNode == nodeToClose && stackNode != nil {
 				stackNode = nil
 				stck.Pop()
 			}
 			nodeToClose = stck.Head()
 		case "tagNameCreating":
-			nd.CreateTagName(char)
+			tagNode.CreateTagName(char)
 		case "tagAttributeNameCreating":
 			if char == " " {
-				nd.SetAttribute()
+				tagNode.SetAttribute()
 			} else {
-				nd.CreateAttributeName(char)
+				tagNode.CreateAttributeName(char)
 			}
 		case "tagAttributeValueCreating":
 			if char == " " {
-				nd.SetAttribute()
+				tagNode.SetAttribute()
 			} else if char != "\"" {
-				nd.CreateAttributeValue(char)
+				tagNode.CreateAttributeValue(char)
 			}
 		case "tagCreatingEnd":
-			nd.SetAttribute()
+			tagNode.SetAttribute()
 			parentNode := stck.Head()
 			if parentNode != nil {
-				nd.SetParent(parentNode)
-				parentNode.SetContent(nd)
+				tagNode.SetParent(parentNode)
+				parentNode.SetContent(tagNode)
 			}
-			stck.Unshift(nd)
-			nodeToClose = nd
-			nd = node.CreateNewNode()
+
+			if _, ok := simpleTags[tagNode.GetTagName()]; !ok {
+				stck.Unshift(tagNode)
+			}
+			nodeToClose = tagNode
+			tagNode = node.CreateNewNode()
 		}
 
 		fmt.Println(char, finsm.GetCurrentState())
